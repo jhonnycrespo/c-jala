@@ -1,0 +1,9 @@
+Implementar:
+
+void disklist_sort(const char* fn)
+
+usar burbuja para hacer el sort.
+
+Fecha de entrega:
+    - Lo hacemos maniana en clases
+

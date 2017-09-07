@@ -1,0 +1,9 @@
+Binary search tree
+==================
+
+Tarea: Implementar un arbol AVL
+	- el arbol tiene que ser equilibrado
+	- Cada que insertemos un nodo, hacer que apunte a su padre.
+
+fecha limite: lunes 11
+
