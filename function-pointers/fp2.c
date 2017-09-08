@@ -1,11 +1,5 @@
 #include <stdio.h>
 
-/**
- * Un function pointer es un puntero que apunta a una direccion de memoria. Pero no apunta a un dato
- * sino a una function.
- * La funcion tiene que tener un signature (tipo de retorno y tipos de parametros).
- */
-
 typedef struct
 {
     // Esta es la declaracion de un puntero a una function que retorna void y no recibe parametros.
@@ -36,6 +30,7 @@ void init_cat(Animal* a)
 int main()
 {
     Animal p, g;
+    
     init_dog(&p);
     init_cat(&g);
 

@@ -1,7 +1,7 @@
 #include <time.h>
 #include <stdio.h>
 
-void flash(void(*p)())
+void flash(void (*p)())
 {
 	clock_t a0 = clock();
 	clock_t a1 = a0;

@@ -1,0 +1,10 @@
+# Executables
+*.exe
+*.out
+
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
