@@ -15,10 +15,11 @@ int main() {
 	// Este operador & nos devuelve la direccion de memoria.
 	pz = &z;
 
+	// Imprime la direccion de memoria de z
 	printf("%p\n", pz);
 
 
-	// Estamos accediendo al valor del espacio de memoria y le estamos asignando otro valor.            
+	// Estamos accediendo al valor que almacena el espacio de memoria y le estamos asignando otro valor.            
 	*pz = 1234567890;
 	printf("%d\n", z);
 

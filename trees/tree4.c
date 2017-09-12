@@ -19,28 +19,12 @@ typedef struct
     void (*f) (void*);
 } bst;
 
-// usamos const void* porque el tipo de dato que recibimos es generico.
-int cmp_int(const void* a, const void* b)
-{
-    int x = *((int*) a);
-    int y = *((int*) b);
-
-    return x - y;
-}
 
 void bst_init(bst* x, int (*cmp)(const void*, const void*), void (*f)(void*))
 {
     x->root = NULL;
     x->cmp = cmp;
     x->f = f;
-}
-
-int* get_int(int n)
-{
-    int* r = (int*) malloc(sizeof(n));
-    *r = n;
-    
-    return r;
 }
 
 int bst_add_r(bst* tree, node** n, void* p)
@@ -71,11 +55,6 @@ int bst_add(bst* tree, void* p)
     return bst_add_r(tree, &(tree->root), p);
 }
 
-void print_int(void* x, const void* p)
-{
-    printf("%d\n", *((int*)p));
-}
-
 void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 {
     if (n == NULL)
@@ -89,14 +68,6 @@ void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 void bst_iterate(bst* tree, void* tag, void (*f)(void*, const void*))
 {
     bst_iterate_r(tree->root, tag, f);
-}
-
-void acum(void* tag, const void* p)
-{
-    int* s = (int*) tag;
-    int n = *((int*) p);
-
-    *s += n;
 }
 
 void* bst_search_r(const bst* tree, const node* n, const void* s)
@@ -161,38 +132,6 @@ int cmp_str(const void* a, const void* b)
 
 int main()
 {
-    bst tree;
-    bst_init(&tree, cmp_int, free);
-
-    bst_add(&tree, get_int(25));
-    bst_add(&tree, get_int(30));
-    bst_add(&tree, get_int(22));
-    bst_add(&tree, get_int(40));
-    bst_add(&tree, get_int(17));
-
-    // printf("%p\n", tree.root);
-    printf("%d\n", *(int*) tree.root->data);
-    
-    // Para que pasar el argumento null?
-    bst_iterate(&tree, NULL, print_int);
-
-    int s = 0;
-    bst_iterate(&tree, &s, acum);
-    printf("suma: %d\n", s);
-
-
-    int n = 40;
-    // Esta funcion debe ser lo bastante generica para buscar cualquier cosa. Por eso pasamos
-    // direccion de memoria en lugar de pasar directamente el entero.
-    void* x = bst_search(&tree, &n);
-
-    if (x == NULL)
-        puts("Not Found");
-    else
-        printf("%d\n", *((int*) x));
-
-    bst_release(&tree);
-
     bst tree2;
 
     bst_init(&tree2, cmp_str, free);
