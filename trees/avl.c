@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct bst_node
+typedef struct avl_node
 {
     void* data;
-    struct bst_node* left;
-    struct bst_node* right;
+    // height of the subtree
+    size_t height;
+    // number of nodes in subtree
+    size_t size;
+    struct avl_node* left;
+    struct avl_node* right;
 } node;
 
 typedef struct
@@ -64,14 +68,122 @@ int heights_difference(node* node)
 
 int bst_add_r(avl* tree, node** n, void* p)
 {
+
+int avl_is_empty(avl* tree)
+{
+    return (tree->root == NULL);
+}
+
+size_t node_size(node** node)
+{
+    if(*(node) == NULL)
+        return 0;
+
+    return (*(node))->size;
+}
+
+size_t node_height(node** node)
+{
+    if (*(node) == NULL)
+        return 0;
+
+    return (*(node))->height;
+}
+
+// la diferencia entre las alturas de los sub-trees deben ser a lo mucho 1
+int balance_factor(node* node)
+{
+    return node_height(&(node->left)) - node_height(&(node->right));
+}
+
+int int_max(int a, int b)
+{
+    if (a > b)
+        return a;
+    else if (b > a)
+        return b;
+
+    return a;
+}
+
+void rotate_right(node** oldRoot)
+{
+    node** newRoot = *oldRoot->left;
+    *oldRoot->left = *newRoot->right;
+    *newRoot->right = *oldRoot;
+
+    newRoot->size = oldRoot->size;
+    oldRoot->size = node_size(&(oldRoot->left)) + node_size(&(oldRoot->right)) + 1;
+    
+    oldRoot->height = int_max(node_height(&(oldRoot->left)), node_height(&(oldRoot->right))) + 1;
+    newRoot->height = int_max(node_height(&(newRoot->left)), node_height(&(newRoot->right))) + 1;
+}
+
+void rotate_left(node** oldRoot)
+{
+    node* newRoot = oldRoot->right;
+    oldRoot->right = newRoot->left;
+    newRoot->left = oldRoot;
+
+    newRoot->size = oldRoot->size;
+    oldRoot->size = node_size(&(oldRoot->left)) + node_size(&(oldRoot->right)) + 1;
+    
+    oldRoot->height = int_max(node_height(&(oldRoot->left)), node_height(&(oldRoot->right))) + 1;
+    newRoot->height = int_max(node_height(&(newRoot->left)), node_height(&(newRoot->right))) + 1;
+}
+
+
+void balance(node** node)
+{
+    if (balance_factor(*node) < -1)
+    {
+        if (balance_factor((*node)->right) > 0)
+        {
+            rotate_right((*node)->right);
+        }
+        rotate_left(&(*node));
+    }
+    else
+    {
+        if (balance_factor((*node)) > 1)
+        {
+            if (balance_factor((*node)->left) < 0)
+            {
+                rotate_left((*node)->left);
+            }
+            rotate_right(&(*node));
+        }
+    }
+}
+
+void avl_init(avl* tree, int (*cmp)(const void*, const void*), void (*f)(void*))
+{
+    tree->root = NULL;
+    tree->cmp = cmp;
+    tree->f = f;
+}
+
+int* get_int(int n)
+{
+    int* r = (int*) malloc(sizeof(n));
+    *r = n;
+    
+    return r;
+}
+
+int avl_add_r(avl* tree, node** n, void* p)
+{
+    int res;
+
     if (*n == NULL)
     {
         *n = (node*) malloc(sizeof(node));
         (*n)->left = NULL;
         (*n)->right = NULL;
         (*n)->data = p;
-        (*n)->nodes = 1;
-        (*n)->heights = 1;
+
+        (*n)->height = 0;
+        (*n)->size = 1;
 
         return 1;
     }
@@ -90,6 +202,34 @@ int bst_add_r(avl* tree, node** n, void* p)
 int bst_add(avl* tree, void* p)
 {
     return bst_add_r(tree, &(tree->root), p);
+
+    printf("r: %d\n", r);
+
+    if (r == 0)
+        return 0;
+
+    // si el node root es mayor
+    if (r > 0)
+    {
+        res =  avl_add_r(tree, &((*n)->left), p);    
+        
+    }
+    else
+    {
+        res =  avl_add_r(tree, &((*n)->right), p);
+    } 
+
+    (*n)->size = node_size(&((*n)->left)) + node_size(&((*n)->right)) + 1;
+    (*n)->height = int_max(node_height(&((*n)->left)), node_height(&((*n)->right))) + 1;
+
+    balance(&(*n));
+
+    return res;
+}
+
+int avl_add(avl* tree, void* p)
+{
+    return avl_add_r(tree, &(tree->root), p);
 }
 
 void print_int(void* x, const void* p)
@@ -97,7 +237,8 @@ void print_int(void* x, const void* p)
     printf("%d\n", *((int*)p));
 }
 
-void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
+
+void avl_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 {
     if (n == NULL)
         return;
@@ -110,6 +251,14 @@ void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 void bst_iterate(avl* tree, void* tag, void(*f)(void*, const void*))
 {
     bst_iterate_r(tree->root, tag, f);
+    avl_iterate_r(n->left, tag, f);
+    f(tag, n->data);
+    avl_iterate_r(n->right, tag, f);
+}
+
+void avl_iterate(avl* tree, void* tag, void (*f)(void*, const void*))
+{
+    avl_iterate_r(tree->root, tag, f);
 }
 
 void acum(void* tag, const void* p)
@@ -120,7 +269,7 @@ void acum(void* tag, const void* p)
     *s += n;
 }
 
-void* bst_search_r(const avl* tree, const node* n, const void* s)
+void* avl_search_r(const avl* tree, const node* n, const void* s)
 {
     // si el arbol esta vacio, o si s no se encuentra en el arbol
     if (n == NULL)
@@ -144,21 +293,33 @@ void* bst_search(const avl* p, const void* s)
 }
 
 void bst_release_r(avl* tree, node* n)
+        return avl_search_r(tree, n->left, s);
+
+    return avl_search_r(tree, n->right, s);
+}
+
+// void* avl_search(const avl* p, const void* s)
+// {
+    // pasamos el arbol, porque en el arbol esta la funcion comparadora.
+    // return avl_search_r(p, p->root, s);
+// }
+
+void avl_release_r(avl* tree, node* n)
 {
     if (n == NULL)
         return;
 
-    bst_release_r(tree, n->left);
-    bst_release_r(tree, n->right);
+    avl_release_r(tree, n->left);
+    avl_release_r(tree, n->right);
     tree->f(n->data);
     free(n);
     puts("bye");
 }
 
-void bst_release(avl* tree)
+void avl_release(avl* tree)
 {
     // El arbol tiene la funcion que sabe liberar la memoria
-    bst_release_r(tree, tree->root);
+    avl_release_r(tree, tree->root);
 }
 
 char* get_str(const char* s) {
@@ -183,58 +344,26 @@ int cmp_str(const void* a, const void* b)
 int main()
 {
     avl tree;
-    bst_init(&tree, cmp_int, free);
 
-    bst_add(&tree, get_int(25));
-    bst_add(&tree, get_int(30));
-    bst_add(&tree, get_int(22));
-    bst_add(&tree, get_int(40));
-    bst_add(&tree, get_int(17));
+    avl_init(&tree, cmp_int, free);
+
+    avl_add(&tree, get_int(50));
+    avl_add(&tree, get_int(45));
+    avl_add(&tree, get_int(65));
+    avl_add(&tree, get_int(55));
+    avl_add(&tree, get_int(75));
+    avl_add(&tree, get_int(70));
+
 
     // printf("%p\n", tree.root);
-    printf("%d\n", *(int*) tree.root->data);
+    // printf("%d\n", *(int*) tree.root->data);
     
     // Para que pasar el argumento null?
-    bst_iterate(&tree, NULL, print_int);
+    avl_iterate(&tree, NULL, print_int);
 
-    int s = 0;
-    bst_iterate(&tree, &s, acum);
-    printf("suma: %d\n", s);
+    // int s = 0;
+    // avl_iterate(&tree, &s, acum);
+    // printf("suma: %d\n", s);
 
-
-    int n = 40;
-    // Esta funcion debe ser lo bastante generica para buscar cualquier cosa. Por eso pasamos
-    // direccion de memoria en lugar de pasar directamente el entero.
-    void* x = bst_search(&tree, &n);
-
-    if (x == NULL)
-        puts("Not Found");
-    else
-        printf("%d\n", *((int*) x));
-
-    bst_release(&tree);
-
-    avl tree2;
-
-    bst_init(&tree2, cmp_str, free);
-
-    bst_add(&tree2, get_str("java"));
-    bst_add(&tree2, get_str("c"));
-    bst_add(&tree2, get_str("c++"));
-    bst_add(&tree2, get_str("pascal"));
-    bst_add(&tree2, get_str("fortran"));
-    bst_add(&tree2, get_str("javascript"));
-
-    bst_iterate(&tree2, NULL, print_str);
-
-    const char* txt = "javascript";
-
-    void* rr = bst_search(&tree2, txt);
-
-    if (rr == NULL)
-        puts("Not Found");
-    else
-        print_str(NULL, rr);
-
-    bst_release(&tree2);
+    avl_release(&tree);
 }
