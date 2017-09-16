@@ -11,12 +11,13 @@ typedef struct avl_node
     size_t size;
     struct avl_node* left;
     struct avl_node* right;
-
 } node;
 
 typedef struct
 {
     node* root;
+    size_t height;
+    size_t nodes:
     int (*cmp) (const void*, const void*);
     void (*f) (void*);
 } avl;
@@ -28,6 +29,45 @@ int cmp_int(const void* a, const void* b)
 
     return x - y;
 }
+
+void bst_init(avl* x, int (*cmp)(const void*, const void*), void (*f)(void*))
+{
+    x->root = NULL;
+    x->cmp = cmp;
+    x->f = f;
+}
+
+int* get_int(int n)
+{
+    int* r = (int*) malloc(sizeof(n));
+    *r = n;
+    
+    return r;
+}
+
+int height(node* node)
+{
+    if (node == NULL)
+        return -1;
+
+    return node->height;
+}
+
+int size(node* node)
+{
+    if (node == NULL)
+        return 0;
+
+    return node->size;
+}
+
+int heights_difference(node* node)
+{
+    return height(node->left) - height(node->right);
+}
+
+int bst_add_r(avl* tree, node** n, void* p)
+{
 
 int avl_is_empty(avl* tree)
 {
@@ -141,6 +181,7 @@ int avl_add_r(avl* tree, node** n, void* p)
         (*n)->left = NULL;
         (*n)->right = NULL;
         (*n)->data = p;
+
         (*n)->height = 0;
         (*n)->size = 1;
 
@@ -148,6 +189,19 @@ int avl_add_r(avl* tree, node** n, void* p)
     }
     
     int r = tree->cmp((*n)->data, p);
+    
+    if (r == 0)
+        return 0;
+        
+    if (r > 0)
+        return bst_add_r(tree, &((*n)->left), p);
+        
+    return bst_add_r(tree, &((*n)->right), p);
+}
+
+int bst_add(avl* tree, void* p)
+{
+    return bst_add_r(tree, &(tree->root), p);
 
     printf("r: %d\n", r);
 
@@ -183,11 +237,20 @@ void print_int(void* x, const void* p)
     printf("%d\n", *((int*)p));
 }
 
+
 void avl_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 {
     if (n == NULL)
         return;
 
+    bst_iterate_r(n->left, tag, f);
+    f(tag, n->data);
+    bst_iterate_r(n->right, tag, f);
+}
+
+void bst_iterate(avl* tree, void* tag, void(*f)(void*, const void*))
+{
+    bst_iterate_r(tree->root, tag, f);
     avl_iterate_r(n->left, tag, f);
     f(tag, n->data);
     avl_iterate_r(n->right, tag, f);
@@ -218,6 +281,18 @@ void* avl_search_r(const avl* tree, const node* n, const void* s)
         return n->data;
 
     if (c > 0)
+        return bst_search_r(tree, n->left, s);
+
+    return bst_search_r(tree, n->right, s);
+}
+
+void* bst_search(const avl* p, const void* s)
+{
+    // pasamos el arbol, porque en el arbol esta la funcion comparadora.
+    return bst_search_r(p, p->root, s);
+}
+
+void bst_release_r(avl* tree, node* n)
         return avl_search_r(tree, n->left, s);
 
     return avl_search_r(tree, n->right, s);
@@ -269,6 +344,7 @@ int cmp_str(const void* a, const void* b)
 int main()
 {
     avl tree;
+
     avl_init(&tree, cmp_int, free);
 
     avl_add(&tree, get_int(50));

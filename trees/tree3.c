@@ -43,6 +43,8 @@ int* get_int(int n)
     return r;
 }
 
+
+
 int bst_add_r(bst* tree, node** n, void* p)
 {
     if (*n == NULL)
@@ -79,9 +81,13 @@ void print_int(void* x, const void* p)
 void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 {
     if (n == NULL)
+    {   
+        puts("jhony");
         return;
+    }
 
     bst_iterate_r(n->left, tag, f);
+    printf("%d\n", *(int*)(n->data));
     f(tag, n->data);
     bst_iterate_r(n->right, tag, f);
 }
@@ -171,17 +177,17 @@ int main()
     bst_add(&tree, get_int(17));
 
     // printf("%p\n", tree.root);
-    printf("%d\n", *(int*) tree.root->data);
+    //printf("%d\n", *(int*) tree.root->data);
     
     // Para que pasar el argumento null?
-    bst_iterate(&tree, NULL, print_int);
+    //bst_iterate(&tree, NULL, print_int);
 
     int s = 0;
     bst_iterate(&tree, &s, acum);
     printf("suma: %d\n", s);
 
 
-    int n = 40;
+    /*int n = 40;
     // Esta funcion debe ser lo bastante generica para buscar cualquier cosa. Por eso pasamos
     // direccion de memoria en lugar de pasar directamente el entero.
     void* x = bst_search(&tree, &n);
@@ -215,5 +221,5 @@ int main()
     else
         print_str(NULL, rr);
 
-    bst_release(&tree2);
+    bst_release(&tree2);*/
 }
