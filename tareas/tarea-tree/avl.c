@@ -23,7 +23,6 @@ void avl_init(avl* tree, int (*cmp)(const void*, const void*), void (*f)(void*))
     tree->root = NULL;
     tree->cmp = cmp;
     tree->f = free;
-
 }
 
 int cmp_int(const void* a, const void* b)
@@ -55,16 +54,19 @@ int max(int a, int b)
     return a > b ? a : b;
 }
 
-void update_height(node* p)
+void update_height(node** p)
 {
-    p->height = 1 + max(height(p->left), height(p->right));
+    (*p)->height = 1 + max(height((*p)->left), height((*p)->right));
 }
 
+// solo paso puntero porque no modifico los valores
 int balance_factor(node* n)
 {
     return height((n)->left) - height((n)->right);
 }
 
+// puedo devolver void y recibir como argumento un puntero de puntero
+// pero asi es mas facil de entender
 node* rotate_right(node* p)
 {
     node* q = p->left;
@@ -72,8 +74,8 @@ node* rotate_right(node* p)
     p->left = q->right;
     q->right = p;
 
-    update_height(p);
-    update_height(q);
+    update_height(&p);
+    update_height(&q);
 
     return q;
 }
@@ -85,15 +87,14 @@ node* rotate_left(node* p)
     p->right = q->left;
     q->left = p;
 
-    update_height(p);
-    update_height(q);
+    update_height(&p);
+    update_height(&q);
 
     return q;
 }
 
 node* balance(node* p)
 {
-    update_height(p);
 
     if (height(p->left) - height(p->right) == 2)
     {
@@ -146,7 +147,8 @@ int avl_add_r(avl* tree, node** n, void* data)
         res = avl_add_r(tree, &((*n)->right), data);    
     }
 
-    balance(*n);
+    update_height(&(*n));
+    *n = balance(*n);
 
     return res;
 }
@@ -168,13 +170,47 @@ void avl_iterate_r(node* n, void* tag, void (*f)(void*, const void*))
 
     avl_iterate_r(n->left, tag, f);
     f(tag, n->data);
-    printf("%d\n", n->height);
     avl_iterate_r(n->right, tag, f);
 }
 
 void avl_iterate(avl* tree, void* tag, void (*f)(void*, const void*))
 {
     avl_iterate_r(tree->root, tag, f);
+}
+
+void avl_release_r(avl* tree, node* n)
+{
+    if (n == NULL)
+        return;
+
+    avl_release_r(tree, n->left);
+    avl_release_r(tree, n->right);
+    tree->f(n->data);
+    free(n);
+}
+
+void avl_release(avl* tree)
+{
+    avl_release_r(tree, tree->root);
+
+}
+
+int cmp_str(const void* a, const void* b)
+{
+    return strcmp((char*) a, (char*) b);
+}
+
+char* get_str(const char* s) {
+    size_t len = strlen(s);
+    char* p = (char*) malloc(len);
+    memcpy(p, s, len + 1);
+
+    return p;
+}
+
+void print_str(void* x, const void* s)
+{
+    puts((char*) s);
 }
 
 int main()
@@ -190,5 +226,26 @@ int main()
     avl_add(&tree, get_int(40));
     avl_add(&tree, get_int(10));
 
+    // debe imprimir 10 15 30 40 50 70
     avl_iterate(&tree, NULL, print_int);
+
+    avl_release(&tree);
+
+    // Usando Strings
+    avl tree2;
+
+    avl_init(&tree2, cmp_str, free);
+
+    avl_add(&tree2, get_str("java"));
+    avl_add(&tree2, get_str("c"));
+    avl_add(&tree2, get_str("python"));
+    avl_add(&tree2, get_str("c++"));
+    avl_add(&tree2, get_str("lisp"));
+    avl_add(&tree2, get_str("haskell"));
+    avl_add(&tree2, get_str("fortran"));
+    avl_add(&tree2, get_str("javascript"));
+
+    avl_iterate(&tree2, NULL, print_str);
+
+    avl_release(&tree2);
 }
