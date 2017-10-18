@@ -4,7 +4,6 @@
 
 typedef struct bst_node
 {
-    // ???
     void* data;
     struct bst_node* left;
     struct bst_node* right;
@@ -13,9 +12,7 @@ typedef struct bst_node
 typedef struct
 {
     node* root;
-    // usamos este punter a function para comparar dos elementos.
     int (*cmp) (const void*, const void*);
-    // usamos este puntero a funcion para liberar la memoria.
     void (*f) (void*);
 } bst;
 
@@ -72,7 +69,6 @@ void bst_iterate(bst* tree, void* tag, void (*f)(void*, const void*))
 
 void* bst_search_r(const bst* tree, const node* n, const void* s)
 {
-    // si el arbol esta vacio, o si s no se encuentra en el arbol
     if (n == NULL)
         return NULL;
 
@@ -89,7 +85,6 @@ void* bst_search_r(const bst* tree, const node* n, const void* s)
 
 void* bst_search(const bst* p, const void* s)
 {
-    // pasamos el arbol, porque en el arbol esta la funcion comparadora.
     return bst_search_r(p, p->root, s);
 }
 
@@ -107,19 +102,18 @@ void bst_release_r(bst* tree, node* n)
 
 void bst_release(bst* tree)
 {
-    // El arbol tiene la funcion que sabe liberar la memoria
     bst_release_r(tree, tree->root);
 }
 
+// por que es necesario hacer esto???
 char* get_str(const char* s) {
     size_t len = strlen(s);
-    char* p = (char*) malloc(len);
+    char* p = (char*) malloc(len + 1);
     memcpy(p, s, len + 1);
 
     return p;
 }
 
-// Recibimos void* x en caso de enviarle NULL.
 void print_str(void* x, const void* s)
 {
     puts((char*) s);
@@ -136,6 +130,8 @@ int main()
 
     bst_init(&tree2, cmp_str, free);
 
+    // Si creo directamente asi, "java" no es creado en el heap.
+    // bst_add(&tree2, "java");
     bst_add(&tree2, get_str("java"));
     bst_add(&tree2, get_str("c"));
     bst_add(&tree2, get_str("c++"));

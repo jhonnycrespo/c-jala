@@ -1,0 +1,54 @@
+Pre-processor statements
+========================
+
+todos los #includes son instrucciones de pre-procesamiento. En la fase de preprocesamiento
+c++ reemplaza los #includes con codigo.
+
+los header files no se compilan, solo los cpps!!!.
+los header files son incluidos en los cpps y los cpps se compilan!!.
+
+
+main function
+=============
+
+Es el punto de entrada a nuestra aplicacion. No es necesario retornar nada, incluso si el tipo
+de variable de retorno de main es int. Si no retornamos nada, asumira que el valor de retorno es 0.
+
+
+operators
+==========
+
+los operators son funciones!!.
+<< es simplemente una funcion.
+
+
+flujo
+=====
+pre-processor phase ->  compilation phase
+
+
+compilation phase -> genera archivos .obj
+
+linker phase
+=============
+
+cuando tenemos todos los archivos .obj, necesitamos una forma de unirlos todos en un archivo .exe.
+
+Esto solo sucede si tenemos mas de un archivo .obj.
+
+
+
+declarations and definitions
+=============================
+
+
+pragma once
+===========
+
+pre-processor directive.
+
+Header Guard.
+
+Only include this file once. Prevents us to including a single header file multiple times into
+a single translation unit. It does not prevent us from including a header file into multiple
+places in our program, just into a single translation unit.

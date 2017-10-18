@@ -4,7 +4,6 @@
 
 typedef struct bst_node
 {
-    // ???
     void* data;
     struct bst_node* left;
     struct bst_node* right;
@@ -13,13 +12,10 @@ typedef struct bst_node
 typedef struct
 {
     node* root;
-    // usamos este punter a function para comparar dos elementos.
     int (*cmp) (const void*, const void*);
-    // usamos este puntero a funcion para liberar la memoria.
     void (*f) (void*);
 } bst;
 
-// usamos const void* porque el tipo de dato que recibimos es generico.
 int cmp_int(const void* a, const void* b)
 {
     int x = *((int*) a);
@@ -82,7 +78,6 @@ void bst_iterate_r(node* n, void* tag, void(*f)(void*, const void*))
 {
     if (n == NULL)
     {   
-        puts("jhony");
         return;
     }
 
@@ -107,7 +102,6 @@ void acum(void* tag, const void* p)
 
 void* bst_search_r(const bst* tree, const node* n, const void* s)
 {
-    // si el arbol esta vacio, o si s no se encuentra en el arbol
     if (n == NULL)
         return NULL;
 
@@ -124,7 +118,6 @@ void* bst_search_r(const bst* tree, const node* n, const void* s)
 
 void* bst_search(const bst* p, const void* s)
 {
-    // pasamos el arbol, porque en el arbol esta la funcion comparadora.
     return bst_search_r(p, p->root, s);
 }
 
@@ -142,7 +135,6 @@ void bst_release_r(bst* tree, node* n)
 
 void bst_release(bst* tree)
 {
-    // El arbol tiene la funcion que sabe liberar la memoria
     bst_release_r(tree, tree->root);
 }
 
@@ -154,7 +146,6 @@ char* get_str(const char* s) {
     return p;
 }
 
-// Recibimos void* x en caso de enviarle NULL.
 void print_str(void* x, const void* s)
 {
     puts((char*) s);
@@ -179,25 +170,25 @@ int main()
     // printf("%p\n", tree.root);
     //printf("%d\n", *(int*) tree.root->data);
     
-    // Para que pasar el argumento null?
-    //bst_iterate(&tree, NULL, print_int);
+    bst_iterate(&tree, NULL, print_int);
 
-    int s = 0;
-    bst_iterate(&tree, &s, acum);
-    printf("suma: %d\n", s);
+    // int s = 0;
+    // bst_iterate(&tree, &s, acum);
+    // printf("suma: %d\n", s);
 
 
-    /*int n = 40;
+    int n = 40;
+
     // Esta funcion debe ser lo bastante generica para buscar cualquier cosa. Por eso pasamos
     // direccion de memoria en lugar de pasar directamente el entero.
-    void* x = bst_search(&tree, &n);
+    // void* x = bst_search(&tree, &n);
 
-    if (x == NULL)
-        puts("Not Found");
-    else
-        printf("%d\n", *((int*) x));
+    // if (x == NULL)
+    //     puts("Not Found");
+    // else
+        // printf("%d\n", *((int*) x));
 
-    bst_release(&tree);
+    // bst_release(&tree);
 
     bst tree2;
 
@@ -221,5 +212,5 @@ int main()
     else
         print_str(NULL, rr);
 
-    bst_release(&tree2);*/
+    bst_release(&tree2);
 }

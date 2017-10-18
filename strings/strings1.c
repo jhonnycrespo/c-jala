@@ -14,6 +14,7 @@ int main(int argc, char const *argv[])
 
 	// Este array esta en el stack. Es posible modificarlo.
 	char x[] = "julio";
+	
 	// Al introducir este caracter le decimos al compilador que ahi termina la cadena.
 	x[1] = '\0';
 	x[2] = 'n'; // Esto es lo mismo *(x+2) = 'n'

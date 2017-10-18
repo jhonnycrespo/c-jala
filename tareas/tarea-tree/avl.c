@@ -96,14 +96,14 @@ node* rotate_left(node* p)
 node* balance(node* p)
 {
 
-    if (height(p->left) - height(p->right) == 2)
+    if (height(p->left) - height(p->right) > 1)
     {
         if (height(p->left->right) > height(p->left->left))
             p->left = rotate_left(p->left);
 
         return rotate_right(p);
     }
-    else if (height(p->right) - height(p->left) == 2)
+    else if (height(p->right) - height(p->left) > 1)
     {
         if (height(p->right->left) > height(p->right->right))
             p->right = rotate_right(p->right);
@@ -236,6 +236,7 @@ int main()
 
     avl_init(&tree2, cmp_str, free);
 
+    // debe imprimit c, c++, fortran, haskell, java, javascript, list, python
     avl_add(&tree2, get_str("java"));
     avl_add(&tree2, get_str("c"));
     avl_add(&tree2, get_str("python"));
